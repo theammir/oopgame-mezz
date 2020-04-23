@@ -1,17 +1,26 @@
 from random import randint
 
+class Item:
+    def __init__(self, charcsTpl):
+        self.Type = charcsTpl[0]
+        self.Buff = charcsTpl[1]
+        self.Debuff = charcsTpl[2]
+        self.Compatibility = charcsTpl[3]
+        self.isEqiupped = False
+        self.Owner = None
+
 CHARS = []
 class Person:
     global CHARS
-    def __init__(self, personTpl : tuple, Enemy : bool):
+    def __init__(self, charcsTpl : tuple, Enemy : bool):
         global CHARS
-        self.Dmg = personTpl[0]
-        self.Hp = personTpl[1]
-        self.Accuracy = personTpl[2]
-        self.Crit = personTpl[3]
-        self.Dodge = personTpl[4]
-        self.Protection = personTpl[5]
-        self.Speed = personTpl[6]
+        self.Dmg = charcsTpl[0]
+        self.Hp = charcsTpl[1]
+        self.Accuracy = charcsTpl[2]
+        self.Crit = charcsTpl[3]
+        self.Dodge = charcsTpl[4]
+        self.Protection = charcsTpl[5]
+        self.Speed = charcsTpl[6]
         self.Enemy = Enemy
         CHARS.append(self)
 
@@ -36,6 +45,7 @@ class Person:
     @staticmethod
     def view():
         global CHARS
+        print('')
         sentence = ''
         for i in CHARS:
             if (i.Enemy == False):
@@ -45,14 +55,67 @@ class Person:
             if (i.Enemy == True):
                 sentence += str(i.Name) + ' '
         print(sentence)
+        print('')
+
+    def equip(self, item : Item):
+        if (self.Enemy == False):
+            if (item.isEqiupped != True):
+                CharcsDict = {'HP' : self.Hp, 'DMG' : self.Dmg, 'DDG' : self.Dodge}
+                CondList = ['<', '>']
+                buffprr = item.Buff[item.Buff.index(' ') + 1:]
+                def buff(self, item, prm, CharcsDict = CharcsDict, buffprr = buffprr):
+                    if (prm == '+'):
+                        print('')
+
+                        print(f'{str(self.Name)} получил бафф {buffprr} от экипировки.')
+                        buffval = int(item.Buff[:item.Buff.index(' ')])
+                        print(f'Старый параметр: {str(CharcsDict[buffprr])} {buffprr}.')
+                        CharcsDict[buffprr] += buffval
+                        print(f'Новый параметр: {str(CharcsDict[buffprr])} {buffprr}.')
+
+                        print('')
+                    elif (prm == '-'):
+                        print(f'{str(self.Name)} подвергся негативному воздействию на {buffprr}.')
+                        buffval = int(item.Buff[:item.Buff.index(' ')])
+                        print(f'Старый параметр: {str(CharcsDict[buffprr])} {buffprr}.')
+                        CharcsDict[buffprr] -= buffval
+                        print(f'Новый параметр: {str(CharcsDict[buffprr])} {buffprr}.')
+
+                        print('')
+
+                if (item.Compatibility[0] == CondList[0]):
+                    # if (self.Hp < compatible (fe <10))
+                    if (CharcsDict[item.Compatibility[item.Compatibility.index(' ') + 1:]] < int(item.Compatibility[1:item.Compatibility.index(' ')])):
+                        buff(self, item, '+')
+                        if (item.Debuff):
+                            buff(self, item, '-')
+                        item.isEqiupped = True
+                        item.Owner = self
+                    else:
+                        print(f'Похоже, {str(self.Name)} не совместим с данным предметом.')
+                elif (item.Compatibility[0] == CondList[1]):
+                    if (CharcsDict[item.Compatibility[item.Compatibility.index(' ') + 1:]] > int(item.Compatibility[1:item.Compatibility.index(' ')])):
+                        buff(self, item, '+')
+                        if (item.Debuff):
+                            buff(self, item, '-')
+                        item.isEqiupped = True
+                        item.Owner = self
+                else:
+                    print('[!] Недопустимый знак сравнения в условии совместмости предмета.')
+            else:
+                print(f'Предмет уже экипирован на {str(item.Owner.Name)}.')
+        else:
+            print('Вы выбрали недопустимую цель для экипировки.')
 
     def attack(self, other):
         if (self.Enemy != other.Enemy):
+            print(f'{str(self.Name)} атаковал {str(other.Name)}. ')
             dodgechance = randint(1, 100)
 
             for i in range(self.Dodge):
                 if (i == dodgechance):
                     print(f'{str(CHARS.index(other))} уклоняется от атаки.\nЕго здоровье составляет {str(other.Hp)} HP.')
+                    Person.view()
                     return
 
             crit = False
@@ -63,7 +126,7 @@ class Person:
                     crit = True
 
             other.Hp -= self.Dmg
-            print(f'{str(self.Name)} атаковал {str(other.Name)}. У {str(other.Name)} осталось {str(other.Hp)} HP.')
+            print(f'У {str(other.Name)} осталось {str(other.Hp)} HP.')
 
             if (crit):
                 other.Hp -= self.Dmg
@@ -72,15 +135,21 @@ class Person:
                 print(f'{str(other.Name)} погиб.')
                 CHARS.remove(other)
 
-                Person.view()
+            Person.view()
+def gobn(n):
+    return Person.getobjbyname(n)
+
 
 TYPE = (1, 2, 3, 100, 30, 6, 7)
+item = Item(('chestplate', '1 HP', '1 DDG', '>1 HP'))
 for i in range(3):
     Person(TYPE, False)
 for i in range(3):
     Person(TYPE, True)
 Person.namethem()
 Person.view()
-CHARS[0].attack(CHARS[3])
+gobn(4).equip(item)
+gobn(1).equip(item)
+gobn(0).attack(gobn(3))
 while (True):
     exec(input())
