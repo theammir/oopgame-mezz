@@ -16,6 +16,7 @@ class Person:
         global CHARS
         self.Dmg = charcsTpl[0]
         self.Hp = charcsTpl[1]
+        self.MaxHP = charcsTpl[1]
         self.Accuracy = charcsTpl[2]
         self.Crit = charcsTpl[3]
         self.Dodge = charcsTpl[4]
@@ -114,13 +115,13 @@ class Person:
             misschance = randint(1, 100)
             for i in range(100 - self.Accuracy):
                 if (i == misschance):
-                    print(f'{str(self.Name)} промахивается!')
+                    print(f'{str(self.Name)} промахивается!\nЗдоровье {str(other.Name)} составляет {str(other.Hp)}/{str(other.MaxHP)} HP.')
                     return
 
             dodgechance = randint(1, 100)
             for i in range(self.Dodge):
                 if (i == dodgechance):
-                    print(f'{str(other.Name)} уклоняется от атаки.\nЕго здоровье составляет {str(other.Hp)} HP.')
+                    print(f'{str(other.Name)} уклоняется от атаки.\nЕго здоровье составляет {str(other.Hp)}/{str(other.MaxHP)} HP.')
                     Person.view()
                     return
 
@@ -131,11 +132,11 @@ class Person:
                     crit = True
 
             other.Hp -= self.Dmg
-            print(f'У {str(other.Name)} осталось {str(other.Hp)} HP.')
+            print(f'У {str(other.Name)} осталось {str(other.Hp)}/{str(other.MaxHP)} HP.')
 
             if (crit):
                 other.Hp -= self.Dmg
-                print(f'КРИТ! У {other.Name} теперь {other.Hp} HP')
+                print(f'КРИТ! У {other.Name} теперь {str(other.Hp)}/{str(other.MaxHP)} HP')
             if (other.Hp <= 0):
                 print(f'{str(other.Name)} погиб.')
                 CHARS.remove(other)
@@ -145,7 +146,7 @@ def gobn(n):
     return Person.getobjbyname(n)
 
 
-TYPE = (1, 2, 3, 100, 30, 6, 7)
+TYPE = (1, 2, 60, 100, 30, 6, 7)
 item = Item(('chestplate', '1 HP', '10 DDG', '>1 HP'))
 for i in range(3):
     Person(TYPE, False)
