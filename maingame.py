@@ -75,8 +75,9 @@ class Person:
 
                         print('')
                     elif (prm == '-'):
+                        buffprr = item.Debuff[item.Debuff.index(' ') + 1:]
                         print(f'{str(self.Name)} подвергся негативному воздействию на {buffprr}.')
-                        buffval = int(item.Buff[:item.Buff.index(' ')])
+                        buffval = int(item.Debuff[:item.Debuff.index(' ')])
                         print(f'Старый параметр: {str(CharcsDict[buffprr])} {buffprr}.')
                         CharcsDict[buffprr] -= buffval
                         print(f'Новый параметр: {str(CharcsDict[buffprr])} {buffprr}.')
@@ -110,17 +111,21 @@ class Person:
     def attack(self, other):
         if (self.Enemy != other.Enemy):
             print(f'{str(self.Name)} атаковал {str(other.Name)}. ')
-            dodgechance = randint(1, 100)
+            misschance = randint(1, 100)
+            for i in range(100 - self.Accuracy):
+                if (i == misschance):
+                    print(f'{str(self.Name)} промахивается!')
+                    return
 
+            dodgechance = randint(1, 100)
             for i in range(self.Dodge):
                 if (i == dodgechance):
-                    print(f'{str(CHARS.index(other))} уклоняется от атаки.\nЕго здоровье составляет {str(other.Hp)} HP.')
+                    print(f'{str(other.Name)} уклоняется от атаки.\nЕго здоровье составляет {str(other.Hp)} HP.')
                     Person.view()
                     return
 
             crit = False
             critchance = randint(1, 100)
-
             for i in range(self.Crit):
                 if (i == critchance):
                     crit = True
@@ -141,14 +146,13 @@ def gobn(n):
 
 
 TYPE = (1, 2, 3, 100, 30, 6, 7)
-item = Item(('chestplate', '1 HP', '1 DDG', '>1 HP'))
+item = Item(('chestplate', '1 HP', '10 DDG', '>1 HP'))
 for i in range(3):
     Person(TYPE, False)
 for i in range(3):
     Person(TYPE, True)
 Person.namethem()
 Person.view()
-gobn(4).equip(item)
 gobn(1).equip(item)
 gobn(0).attack(gobn(3))
 while (True):
