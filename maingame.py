@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 class Item:
     def __init__(self, charcsTpl):
@@ -10,6 +10,7 @@ class Item:
         self.Owner = None
 
 CHARS = []
+MOVE  = {}
 class Person:
     global CHARS
     def __init__(self, charcsTpl : tuple, Enemy : bool):
@@ -27,15 +28,10 @@ class Person:
 
     @staticmethod
     def getobjbyname(name):
+        global CHARS
         for i in CHARS:
             if (i.Name == name):
                 return i
-
-    @staticmethod
-    def getindbyname(name):
-        for i in CHARS:
-            if (i.Name == name):
-                return CHARS.index(i)
 
     @staticmethod
     def namethem():
@@ -58,10 +54,24 @@ class Person:
         print(sentence)
         print('')
 
+    @staticmethod
+    def setmove():
+        global CHARS
+        global MOVE
+        MOVE = {}
+        temp = []
+        for i in CHARS:
+            temp.append(i)
+        for i in range(1, len(CHARS) + 1):
+            j = choice(temp)
+            MOVE[i] = j
+            temp.remove(j)
+
+
     def equip(self, item : Item):
         if (self.Enemy == False):
             if (item.isEqiupped != True):
-                CharcsDict = {'HP' : self.Hp, 'DMG' : self.Dmg, 'DDG' : self.Dodge}
+                CharcsDict = {'HP' : self.MaxHP, 'DMG' : self.Dmg, 'DDG' : self.Dodge}
                 CondList = ['<', '>']
                 buffprr = item.Buff[item.Buff.index(' ') + 1:]
                 def buff(self, item, prm, CharcsDict = CharcsDict, buffprr = buffprr):
@@ -140,13 +150,52 @@ class Person:
             if (other.Hp <= 0):
                 print(f'{str(other.Name)} погиб.')
                 CHARS.remove(other)
+            print('')
+            input()
 
             Person.view()
+
+    @staticmethod
+    def round(CHARS = CHARS):
+        global MOVE
+        Person.setmove()
+        for i in range(1, len(MOVE) + 1):
+            i = MOVE[i]
+            if (i in CHARS):
+                print(f'{str(i.Name)} атакует!')
+                if (i.Enemy == False):
+                    attacked = int(input('Кого вы хотите атаковать?: '))
+                    if (gobn(attacked)):
+                        i.attack(gobn(attacked))
+                    else:
+                        print('Не существует такого персонажа, которого вы хотите атаковать.')
+                elif (i.Enemy == True):
+                    attacked = None
+                    enemy = None
+                    while (enemy != False):
+                        attacked = choice(CHARS)
+                        enemy = attacked.Enemy
+                    i.attack(attacked)
+                if (won()):
+                    return
+
 def gobn(n):
     return Person.getobjbyname(n)
 
+def won():
+    global CHARS
+    temp = []
+    for i in CHARS:
+        temp.append(i.Enemy)
+    temp = set(temp)
+    if (len(temp) == 1):
+        return True
+    else:
+        return False
 
-TYPE = (1, 2, 60, 100, 30, 6, 7)
+
+print('Для продолжения после результатов атаки жмите Enter.')
+TYPE = (5, 11, 85, 50, 30, 6, 7)
 item = Item(('chestplate', '1 HP', '10 DDG', '>1 HP'))
 for i in range(3):
     Person(TYPE, False)
@@ -155,6 +204,6 @@ for i in range(3):
 Person.namethem()
 Person.view()
 gobn(1).equip(item)
-gobn(0).attack(gobn(3))
-while (True):
-    exec(input())
+while not (won()):
+    Person.round()
+print('GAME OVER')
