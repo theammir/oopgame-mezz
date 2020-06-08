@@ -28,6 +28,13 @@ ITEMS = [
     ('chestplate', '3 DMG', '1 HP', '>7 DMG'),
     ('boots', '5 SPD', '3 DDG', '>2 CRT'),
     ('boots', '5 DDG', '3 SPD', '=5 CRT'),
+    ('amulet', '10 CRT', None, '>4 CRT'),
+    ('amulet', '2 HP', '3 CRT', '=10 DDG'),
+    ('sword', '3 ACC', '2 SPD', '>4 CRT'),
+    ('STAR ARTIFACT', '10 DMG', None, None),
+    ('STAR ARTIFACT', '30 DDG', None, None),
+    ('STAR ARTIFACT', '13 HP', None, None),
+    ('STAR ARTIFACT', '15 PRT', None, None),
 ]
 
 INVENTORY = []
@@ -36,6 +43,7 @@ class Person:
     global CHARS
     def __init__(self, charcsTpl : tuple, Enemy : bool):
         global CHARS
+        self.Name = None
         self.Dmg = charcsTpl[0]
         self.Hp = charcsTpl[1]
         self.MaxHP = charcsTpl[1]
@@ -72,7 +80,7 @@ class Person:
         for i in CHARS:
             if (i.Enemy == False):
                 sentence += str(i.Name) + ' '
-        sentence += '\/ '
+        sentence += r'\/ '
         for i in CHARS:
             if (i.Enemy == True):
                 sentence += str(i.Name) + ' '
@@ -97,16 +105,18 @@ class Person:
         global TYPES
         global CHARS
         CHARS = []
-        for i in range(these):
+        for _ in range(these):
             Person(choice(TYPES), False)
-        for i in range(those):
+        for _ in range(those):
             Person(choice(TYPES), True)
 
     def equip(self, item : Item):
         if (self.Enemy == False):
             if (item.isEqiupped != True):
                 if not (item.Type in self.Equipped):
-                    CharcsDict = {'HP' : self.MaxHP, 'DMG' : self.Dmg[1], 'DDG' : self.Dodge, 'PRT' : self.Protection, 'SPD' : self.Speed, 'CRT' : self.Crit}
+                    CharcsDict = {'HP' : self.MaxHP, 'DMG' : self.Dmg[1], 'DDG' : self.Dodge, 
+                                  'PRT' : self.Protection, 'SPD' : self.Speed, 'CRT' : self.Crit,
+                                  'ACC' : self.Accuracy}
                     CondList = ['<', '>', '=']
                     buffprr = item.Buff[item.Buff.index(' ') + 1:]
                     def buff(self, item, prm, CharcsDict = CharcsDict, buffprr = buffprr):
@@ -129,47 +139,56 @@ class Person:
                             print(f'Новый параметр: {str(CharcsDict[buffprr])} {buffprr}.')
 
                             print('')
+                    if (item.Compatibility):
+                        if (item.Compatibility[0] == CondList[0]):
+                            # if (self.Hp < compatible (eg <10))
+                            if (CharcsDict[item.Compatibility[item.Compatibility.index(' ') + 1:]] < int(item.Compatibility[1:item.Compatibility.index(' ')])):
+                                buff(self, item, '+')
+                                if (item.Debuff):
+                                    buff(self, item, '-')
 
-                    if (item.Compatibility[0] == CondList[0]):
-                        # if (self.Hp < compatible (fe <10))
-                        if (CharcsDict[item.Compatibility[item.Compatibility.index(' ') + 1:]] < int(item.Compatibility[1:item.Compatibility.index(' ')])):
-                            buff(self, item, '+')
-                            if (item.Debuff):
-                                buff(self, item, '-')
+                                item.isEqiupped = True
+                                item.Owner = self
+                                self.Equipped.append(item.Type)
+                            else:
+                                print(f'Похоже, {str(self.Name)} не совместим с данным предметом.')
 
-                            item.isEqiupped = True
-                            item.Owner = self
-                            self.Equipped.append(item.Type)
+                        elif (item.Compatibility[0] == CondList[1]):
+                            if (CharcsDict[item.Compatibility[item.Compatibility.index(' ') + 1:]] > int(item.Compatibility[1:item.Compatibility.index(' ')])):
+                                buff(self, item, '+')
+                                if (item.Debuff):
+                                    buff(self, item, '-')
+
+                                item.isEqiupped = True
+                                item.Owner = self
+                                self.Equipped.append(item.Type)
+                                return True
+
+                            else:
+                                print(f'Похоже, {str(self.Name)} не совместим с данным предметом.')
+                        elif (item.Compatibility[0] == CondList[2]):
+                            if (CharcsDict[item.Compatibility[item.Compatibility.index(' ') + 1:]] == int(item.Compatibility[1:item.Compatibility.index(' ')])):
+                                buff(self, item, '+')
+                                if (item.Debuff):
+                                    buff(self, item, '-')
+
+                                item.isEqiupped = True
+                                item.Owner = self
+                                self.Equipped.append(item.Type)
+                                return True
+
+                            else:
+                                print(f'Похоже, {str(self.Name)} не совместим с данным предметом.')
                         else:
-                            print(f'Похоже, {str(self.Name)} не совместим с данным предметом.')
-                    elif (item.Compatibility[0] == CondList[1]):
-                        if (CharcsDict[item.Compatibility[item.Compatibility.index(' ') + 1:]] > int(item.Compatibility[1:item.Compatibility.index(' ')])):
-                            buff(self, item, '+')
-                            if (item.Debuff):
-                                buff(self, item, '-')
-
-                            item.isEqiupped = True
-                            item.Owner = self
-                            self.Equipped.append(item.Type)
-                            return True
-
-                        else:
-                            print(f'Похоже, {str(self.Name)} не совместим с данным предметом.')
-                    elif (item.Compatibility[0] == CondList[2]):
-                        if (CharcsDict[item.Compatibility[item.Compatibility.index(' ') + 1:]] == int(item.Compatibility[1:item.Compatibility.index(' ')])):
-                            buff(self, item, '+')
-                            if (item.Debuff):
-                                buff(self, item, '-')
-
-                            item.isEqiupped = True
-                            item.Owner = self
-                            self.Equipped.append(item.Type)
-                            return True
-
-                        else:
-                            print(f'Похоже, {str(self.Name)} не совместим с данным предметом.')
+                            print('[!] Недопустимый знак сравнения в условии совместмости предмета.')
                     else:
-                        print('[!] Недопустимый знак сравнения в условии совместмости предмета.')
+                        buff(self, item, '+')
+                        if (item.Debuff):
+                            buff(self, item, '-')
+
+                        item.isEqiupped = True
+                        item.Owner = self
+                        self.Equipped.append(item.Type)
                 else:
                     print('Предмет этого типа уже экипирован на персонаже.')
             else:
@@ -215,6 +234,9 @@ class Person:
             input()
 
             Person.view()
+        else:
+            print('Нельзя атаковать своих!')
+            self.attack(gobn(int(input('Кого вы хотите атаковать?: '))))
 
     @staticmethod
     def round():
@@ -231,7 +253,14 @@ class Person:
                         choose = input('Выбор: Просмотреть [И]нвентарь, [П]роинспектировать, [А]таковать\n:')
                         print('')
                         if (choose.lower().startswith('а')):
-                            attacked = int(input('Кого вы хотите атаковать?: '))
+                            indexchoosed = False
+                            attacked = None
+                            while (indexchoosed == False):
+                                try:
+                                    attacked = int(input('Кого вы хотите атаковать?: '))
+                                except ValueError:
+                                    pass
+                                indexchoosed = True
                             if (gobn(attacked)):
                                 i.attack(gobn(attacked))
                                 ischoosed = True
@@ -247,7 +276,16 @@ class Person:
                                     print('')
                                     if (chooose.lower().startswith('и')):
                                         if (INVENTORY != []):
-                                            index = int(input('Введите индекс предмета: '))
+                                            indexchoosed = False
+                                            index = None
+                                            while (indexchoosed == False):
+                                                try:
+                                                    index = int(input('Введите индекс предмета: '))
+                                                except ValueError:
+                                                    pass
+                                                if (index in range(len(INVENTORY))):
+                                                    indexchoosed = True
+
                                             if (INVENTORY[index]):
                                                 if (i.equip(INVENTORY[index])):
                                                     i.equip(INVENTORY[index])
@@ -307,6 +345,6 @@ def startgame():
         Person.view()
         while not (won()):
             Person.round()
-        gamech = input('Вы хотите пойти в еще одну [И]гру или [З]акончить?\n:')
+        gamech = input('Вы хотите пойти в еще одну [И]гру или [З]акончить? (вам будут выданы случайные предметы в инвентарь)\n:')
 
 startgame()
